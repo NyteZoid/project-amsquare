@@ -80,6 +80,25 @@ async def on_message(message):
             
 
 
+@bot.command()
+async def level(ctx, member: discord.Member = None):
+    member  = member or ctx.author
+    userid = str(member.id)
+    
+    if userid not in xpdata:
+        return await ctx.send(f"{member.name} has no XP yet.")
+    
+    xp = xpdata[userid]["xp"]
+    level = xpdata[userid]["level"]
+    
+    await ctx.send(
+        f"**{member.name}**\n"
+        f"Level: **{level}**\n"
+        f"XP: **{xp}**"
+)
+    
+
+
 bot.run('token')
 
 
