@@ -9,7 +9,7 @@ ints.message_content = True
 ints.guilds = True
 ints.members = True
 
-bot = commands.Bot(command_prefix = "$", intents = ints)
+bot = commands.Bot(command_prefix = "*", intents = ints)
 
 @bot.event
 async def on_ready():
