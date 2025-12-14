@@ -81,22 +81,45 @@ async def on_message(message):
 
 
 @bot.command()
-async def level(ctx, member: discord.Member = None):
-    member  = member or ctx.author
+async def level(context, member: discord.Member = None):
+    member  = member or context.author
     userid = str(member.id)
     
     if userid not in xpdata:
-        return await ctx.send(f"{member.name} has no XP yet.")
+        return await context.send(f"{member.name} has no XP yet.")
     
     xp = xpdata[userid]["xp"]
     level = xpdata[userid]["level"]
     
-    await ctx.send(
+    await context.send(
         f"**{member.name}**\n"
         f"Level: **{level}**\n"
         f"XP: **{xp}**"
 )
     
+
+
+@bot.command()
+async def leaderboard(context):
+    if len(xpdata) == 0:
+        return await context.send("No XP data available yet.")
+    
+    sortedusers = sorted(xpdata.items(), key = lambda x: x[1]["xp"], reverse = True)
+    
+    top10 = sortedusers[:10]
+
+    msg = "__**AMsquare Leaderboard**__\n\n"
+    
+    rank = 1
+    for (userid,data) in top10:
+        user = await bot.fetch_user(int(userid))
+        xp = data["xp"]
+        level = data["level"]
+        
+        msg = msg + f"{rank}. {user.name} — Level {level}, {xp} XP\n"
+        rank = rank + 1
+        
+    await context.send(msg)
 
 
 bot.run('token')
