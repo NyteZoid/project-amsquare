@@ -20,8 +20,7 @@ async def on_ready():
 
         if channel is None:
             channel = await client.fetch_channel(1449705870698090629)
-    
-        if channel is not None:
+        elif channel is not None:
             message = await channel.send("AMsquare, squaring as always!")
             await message.add_reaction("🤖")
         else:
