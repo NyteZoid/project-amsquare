@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix = "*", intents = ints)
 async def on_ready():
     await bot.change_presence(
         status = discord.Status.online, 
-        activity = discord.Game(name = "Sleeping ZZZ")
+        activity = discord.Game(name = "Being Coded")
     )
     print("Bot Connected")
 
@@ -24,11 +24,12 @@ async def on_ready():
 
         if channel is None:
             channel = await bot.fetch_channel(1449705870698090629)
-        elif channel is not None:
-            message = await channel.send("AMsquare, squaring as always!")
-            await message.add_reaction("🤖")
-        else:
-            print("Channel not found")
+            if channel is None:
+                print("Channel not found")
+            else:
+                return
+        message = await channel.send("AMsquare, squaring as always!")
+        await message.add_reaction("🤖")
 
     except Exception as e:
         print(f"Error: {e}")
