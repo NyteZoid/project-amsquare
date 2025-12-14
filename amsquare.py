@@ -1,7 +1,13 @@
 #start
 
+
+
 import discord
 from discord.ext import commands
+import json
+import os
+
+
 
 ints = discord.Intents.default()
 ints.messages = True
@@ -10,6 +16,8 @@ ints.guilds = True
 ints.members = True
 
 bot = commands.Bot(command_prefix = "*", intents = ints)
+
+
 
 @bot.event
 async def on_ready():
@@ -33,7 +41,47 @@ async def on_ready():
 
     except Exception as e:
         print(f"Error: {e}")
+        
+        
+        
+xpfile = "xp.json"  
+if os.path.exists(xpfile):
+    with open(xpfile, "r") as F:
+        xpdata = json.load(F)   
+else:
+    xpdata = {}
+        
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    
+    userid = str(message.author.id)
+    
+    if userid not in xpdata:
+        xpdata[userid] = {"xp": 0, "level": 1}
+        
+    xpdata[userid]["xp"] = xpdata[userid]["xp"] + 10
+    
+    xp = xpdata[userid]["xp"]
+    level = xpdata[userid]["level"]
+    xpneed = level * 100
+    
+    if xp >= xpneed:
+        xpdata[userid]["level"] = xpdata[userid]["level"] + 1
+        xpdata[userid]["xp"] = xpdata[userid]["xp"] - xpneed
+        
+        await message.channel.send(f"**{message.author.name} leveled up to level {xpdata[userid]["level"]}!**")
+        
+    with open(xpfile, "w") as F:
+        json.dump(xpdata, F)
+        
+    await bot.process_commands(message)
+            
+
 
 bot.run('token')
+
+
 
 #end
