@@ -2,6 +2,7 @@
 
 
 
+#imports
 import discord
 from discord.ext import commands
 import json
@@ -9,6 +10,7 @@ import os
 
 
 
+#bot setup
 ints = discord.Intents.default()
 ints.messages = True
 ints.message_content = True
@@ -19,14 +21,17 @@ bot = commands.Bot(command_prefix = "*", intents = ints)
 
 
 
+#on ready event
 @bot.event
 async def on_ready():
+    #set bot presence
     await bot.change_presence(
         status = discord.Status.online, 
         activity = discord.Game(name = "Being Coded")
     )
     print("Bot Connected")
 
+    #send message to specific channel
     try:
         channel = bot.get_channel(1449705870698090629)
 
@@ -42,15 +47,17 @@ async def on_ready():
     except Exception as e:
         print(f"Error: {e}")
         
+   
         
-        
+#XP file   
 xpfile = "xp.json"  
 if os.path.exists(xpfile):
     with open(xpfile, "r") as F:
         xpdata = json.load(F)   
 else:
     xpdata = {}
-        
+    
+#XP system    
 @bot.event
 async def on_message(message):
     if message.author.bot:
@@ -66,7 +73,8 @@ async def on_message(message):
     xp = xpdata[userid]["xp"]
     level = xpdata[userid]["level"]
     xpneed = level * 100
-    
+
+    #check for level up
     if xp >= xpneed:
         xpdata[userid]["level"] = xpdata[userid]["level"] + 1
         xpdata[userid]["xp"] = xpdata[userid]["xp"] - xpneed
@@ -80,8 +88,10 @@ async def on_message(message):
             
 
 
+#level command
 @bot.command()
 async def level(context, member: discord.Member = None):
+    #get member info
     member  = member or context.author
     userid = str(member.id)
     
@@ -91,6 +101,7 @@ async def level(context, member: discord.Member = None):
     xp = xpdata[userid]["xp"]
     level = xpdata[userid]["level"]
     
+    #send level and xp info
     await context.send(
         f"**{member.name}**\n"
         f"Level: **{level}**\n"
@@ -99,17 +110,20 @@ async def level(context, member: discord.Member = None):
     
 
 
+#leaderboard command
 @bot.command()
 async def leaderboard(context):
     if len(xpdata) == 0:
         return await context.send("No XP data available yet.")
-    
+
+    #sort users by xp
     sortedusers = sorted(xpdata.items(), key = lambda x: x[1]["xp"], reverse = True)
     
     top10 = sortedusers[:10]
 
     msg = "__**AMsquare Leaderboard**__\n\n"
     
+    #build leaderboard message
     rank = 1
     for (userid,data) in top10:
         user = await bot.fetch_user(int(userid))
@@ -122,6 +136,8 @@ async def leaderboard(context):
     await context.send(msg)
 
 
+
+#run bot
 bot.run('token')
 
 
