@@ -4,8 +4,6 @@
 #imports
 import discord
 from discord.ext import commands
-import json
-import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -84,7 +82,6 @@ async def on_message(message):
     await bot.process_commands(message)
             
 
-
 #level command
 @bot.command()
 async def level(context, member: discord.Member = None):
@@ -107,7 +104,6 @@ async def level(context, member: discord.Member = None):
         f"Level: **{level}**\n"
         f"XP: **{xp}**"
 )
-    
 
 
 #leaderboard command
@@ -146,10 +142,8 @@ async def leaderboard(context):
     await context.send(msg)
 
 
-
 #run bot
 bot.run('TOKEN')
 
 
-
-#end*
+#end
