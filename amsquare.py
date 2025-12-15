@@ -1,14 +1,20 @@
 #start
 
 
-
 #imports
 import discord
 from discord.ext import commands
 import json
 import os
+import firebase_admin
+from firebase_admin import credentials, firestore
 
+#Initialize Firebase
+cred = credentials.Certificate("firebase_key.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
+users_ref = db.collection("users")
 
 #bot setup
 ints = discord.Intents.default()
@@ -18,7 +24,6 @@ ints.guilds = True
 ints.members = True
 
 bot = commands.Bot(command_prefix = "*", intents = ints)
-
 
 
 #on ready event
@@ -47,16 +52,7 @@ async def on_ready():
     except Exception as e:
         print(f"Error: {e}")
         
-   
-        
-#XP file   
-xpfile = "xp.json"  
-if os.path.exists(xpfile):
-    with open(xpfile, "r") as F:
-        xpdata = json.load(F)   
-else:
-    xpdata = {}
-    
+          
 #XP system    
 @bot.event
 async def on_message(message):
@@ -64,25 +60,26 @@ async def on_message(message):
         return
     
     userid = str(message.author.id)
+    userdoc = users_ref.document(userid)
+
+    data = userdoc.get().to_dict()
+    if data is None:
+        data = {"xp": 0,"level":1}
     
-    if userid not in xpdata:
-        xpdata[userid] = {"xp": 0, "level": 1}
-        
-    xpdata[userid]["xp"] = xpdata[userid]["xp"] + 10
+    data["xp"] = data["xp"] + 10
     
-    xp = xpdata[userid]["xp"]
-    level = xpdata[userid]["level"]
+    xp = data["xp"]
+    level = data["level"]
     xpneed = level * 100
 
     #check for level up
     if xp >= xpneed:
-        xpdata[userid]["level"] = xpdata[userid]["level"] + 1
-        xpdata[userid]["xp"] = xpdata[userid]["xp"] - xpneed
+        data["level"] = data["level"] + 1
+        data["xp"] = xp - xpneed
         
-        await message.channel.send(f"**{message.author.name} leveled up to level {xpdata[userid]["level"]}!**")
+        await message.channel.send(f"**{message.author.name} leveled up to level {data["level"]}!**")
         
-    with open(xpfile, "w") as F:
-        json.dump(xpdata, F)
+    userdoc.set(data)
         
     await bot.process_commands(message)
             
@@ -95,11 +92,14 @@ async def level(context, member: discord.Member = None):
     member  = member or context.author
     userid = str(member.id)
     
-    if userid not in xpdata:
+    userdoc = users_ref.document(userid).get()
+    data = userdoc.to_dict()
+
+    if data is None:
         return await context.send(f"{member.name} has no XP yet.")
     
-    xp = xpdata[userid]["xp"]
-    level = xpdata[userid]["level"]
+    xp = data["xp"]
+    level = data["level"]
     
     #send level and xp info
     await context.send(
@@ -113,11 +113,21 @@ async def level(context, member: discord.Member = None):
 #leaderboard command
 @bot.command()
 async def leaderboard(context):
-    if len(xpdata) == 0:
+
+    xpref = db.collection("users")
+
+    docs = xpref.stream()
+    data = []
+
+    for doc in docs:
+        userdata = doc.to_dict()
+        data.append((doc.id,userdata))
+
+    if len(data) == 0:
         return await context.send("No XP data available yet.")
 
     #sort users by xp
-    sortedusers = sorted(xpdata.items(), key = lambda x: x[1]["xp"], reverse = True)
+    sortedusers = sorted(data, key = lambda x: x[1]["xp"], reverse = True)
     
     top10 = sortedusers[:10]
 
@@ -138,8 +148,8 @@ async def leaderboard(context):
 
 
 #run bot
-bot.run('token')
+bot.run('TOKEN')
 
 
 
-#end
+#end*
