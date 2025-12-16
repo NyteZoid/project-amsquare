@@ -70,7 +70,9 @@ async def on_message(message):
     if data is None:
         data = {"xp": 0,"level":1}
     
-    data["xp"] = data["xp"] + 10
+    charcount = len(message.content)
+    xpgain = min(charcount // 4, 100)
+    data["xp"] = data["xp"] + xpgain
     
     xp = data["xp"]
     level = data["level"]
