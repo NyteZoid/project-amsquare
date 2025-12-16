@@ -85,7 +85,7 @@ async def on_message(message):
 
 #level command
 @bot.command()
-async def xp(context, member: discord.Member = None):
+async def level(context, member: discord.Member = None):
     #get member info
     member  = member or context.author
     userid = str(member.id)
