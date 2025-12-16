@@ -8,9 +8,14 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import os
 import json
+from dotenv import load_dotenv
+
+
+#load keys env file
+load_dotenv()
 
 #Initialize Firebase
-cred = credentials.Certificate((json.loads(os.getenv('firebase_key'))))
+cred = credentials.Certificate((json.loads(os.getenv("firebase_key"))))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 users_ref = db.collection("users")
