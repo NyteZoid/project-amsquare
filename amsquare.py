@@ -6,12 +6,13 @@ import discord
 from discord.ext import commands
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
+import json
 
 #Initialize Firebase
-cred = credentials.Certificate("firebase_key.json")
+cred = credentials.Certificate((json.loads(os.getenv('firebase_key'))))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-
 users_ref = db.collection("users")
 
 #bot setup
@@ -142,8 +143,8 @@ async def leaderboard(context):
     await context.send(msg)
 
 
-#run bot
-bot.run('TOKEN')
+#run 
+bot.run(os.getenv('discord_token'))
 
 
 #end
