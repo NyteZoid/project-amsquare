@@ -150,6 +150,23 @@ async def leaderboard(context):
     await context.send(msg)
 
 
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(context, member: discord.Member, *, reason="No reason lil bro"):
+    if member == context.author:
+        return await context.send("You cannot kick yourself.")
+    
+    if member.top_role >= context.author.top_role:
+        return await context.send("You cannot kick someone with an equal or higher role than you")
+    
+    try:
+        await member.send(f"You have been kicked from **{context.guild.name}**.\nReason: {reason}")
+    except discord.Forbidden:
+        pass #If the user has DMs closed or has blocked the bot, we ignore the error.
+
+    await member.kick(reason=reason)
+    await context.send(f"**{member.name}** has been kicked.\nReason: {reason}")
+
 #run 
 bot.run(os.getenv('discord_token'))
 
